@@ -28,25 +28,27 @@ playersMenu:-
 	write('TIME TO CHOOSE YOUR BATTLE NAME'),nl,nl,
 	write('Player 1 -x- '),
 	read(X),
-	P1[X, 1, T], nl, %creates player using a list (1st element == name, 2nd element == number of pieces in the board, 3rd element == if is player's turn is 'T' else is 'F')
+	P1=[X, 1, 'T'], nl, %creates player using a list (1st element == name, 2nd element == number of pieces in the board, 3rd element == if is player's turn is 'T' else is 'F')
 	write('Player 2 -o- '),
-	read(X),
-	P2[X, 1, F], nl, %creates player using a list (1st element == name, 2nd element == number of pieces in the board, 3rd element == if is player's turn is 'T' else is 'F')
+	read(Y),
+	P2=[Y, 1, 'F'], nl, %creates player using a list (1st element == name, 2nd element == number of pieces in the board, 3rd element == if is player's turn is 'T' else is 'F')
 	startGame.
 
-	
+
 % ---------------------------------GAME MENU------------------------------------
 startGame:-
 	nl, nl,
 	write('============================================'),nl,
-	write('YOU ARE NOW PLAYING FINES'),nl,nl,
+	write('       YOU ARE NOW PLAYING FINES'),nl,
+	write('============================================'),nl,nl,
 	initialBoard(BOARD), %creates initial board
 	playingMenu.
 
 playingMenu:-
 	nl, nl,
 	write('============================================'),nl,
-	%write the name of the player who is playing
+	member('T', P1) == 0 ->write('PLAYER 1 '),
+	member('T', P2) == 0 ->write('PLAYER 2 '), 
 	write('IS YOUR TURN'),nl,nl,
 	printBoard(BOARD),
 	write('1- Add Piece'), nl,
@@ -121,4 +123,16 @@ printBoard([H|T]):-
 	printBoard(T).
 
 
-%-------------------------------------------------------------------------------
+%---------------------------------PLAYING RULES---------------------------------
+
+endOfTurn:-
+	member('T', P1), !, endOfTurnAction1.
+	endOfTurnAction2.
+
+endOfTurnAction1:-
+	replace(P1, 2, 'F', P1)),
+	replace(P2, 2, 'T', P2)).
+
+endOfTurnAction2:-
+	replace(P2, 2, 'F', P2)),
+	replace(P1, 2, 'T', P1)).
