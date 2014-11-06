@@ -64,6 +64,14 @@ startGame(P1, P2):-
   playingMenu(BOARD, P).
 
 playingMenu(BOARD, P):-
+  checkGameEnd(BOARD),
+  write('Game Ended !'), nl,
+  countPoints(B, Pp1, Pp2),
+  write('Players1 pontuation: '), write(Pp1), nl,
+  write('Players2 pontuation: '), write(Pp2), nl, nl
+  write('The winner is ').
+
+playingMenu(BOARD, P):-
   nl, nl,
   write('============================================'),nl,
   write('IS YOUR TURN'),nl,nl,
