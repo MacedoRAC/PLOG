@@ -53,7 +53,7 @@ aI_AI_Menu:-
   startGame(AI1, AI2).
 
 
-% ---------------------------------GAME MENU------------------------------------
+% ----------------------- PLAYER AGAINST PLAYER MODE ---------------------------
 startGame(P1, P2):-
   nl, nl,
   write('============================================'),nl,
@@ -65,8 +65,9 @@ startGame(P1, P2):-
 
 playingMenu(BOARD, P):-
   checkGameEnd(BOARD),
+  !,
   write('Game Ended !'), nl,
-  countPoints(B, Pp1, Pp2),
+  countPoints(BOARD, Pp1, Pp2),
   write('Players1 pontuation: '), write(Pp1), nl,
   write('Players2 pontuation: '), write(Pp2), nl, nl
   write('The winner is ').
@@ -91,3 +92,82 @@ gameMenuOption(X):-
     X = 4 -> (write('Game Ended!'),nl, fines);
     (write('Wrong Choice!'),nl,playingMenu)
   ).
+
+
+
+  % ----------------------- PLAYER AGAINST AI MODE ---------------------------
+  startGame(P1, AI):-
+    nl, nl,
+    write('============================================'),nl,
+    write('       YOU ARE NOW PLAYING FINES'),nl,
+    write('============================================'),nl,nl,
+    initialBoard(BOARD), %creates initial board
+    P is P1.
+    playingMenu(BOARD, P).
+
+  playingMenu(BOARD, P):-
+    checkGameEnd(BOARD),
+    !,
+    write('Game Ended !'), nl,
+    countPoints(BOARD, Pp1, C),
+    write('Player1 pontuation: '), write(Pp1), nl,
+    write('Computer pontuation: '), write(C), nl, nl
+    write('The winner is ').
+
+  playingMenu(BOARD, P):-
+    P == P1,
+    !,
+    nl, nl,
+    write('============================================'),nl,
+    write('IS YOUR TURN'),nl,nl,
+    printBoard(BOARD),
+    write('1- Add Piece'), nl,
+    write('2- Move Piece'), nl,
+    write('3- Add Fence'), nl, %not sure if u must add a piece after you move
+    write('4- End Game'), nl,
+    read(X),
+    gameMenuOption(X).
+
+  playingMenu(BOARD, P):-
+    printBoard(BOARD),
+    write('Computer will play'),
+    AI_turn(), %%%%%%%%%% NOT IMPLEMENTED YET %%%%%%%%%%%
+    printBoard(BOARD),
+    endTurn(BOARD, P).
+
+  gameMenuOption(X):-
+    (
+      X = 1 -> addPiece;
+      X = 2 -> movePiece;
+      X = 3 -> addFence;
+      X = 4 -> (write('Game Ended!'),nl, fines);
+      (write('Wrong Choice!'),nl,playingMenu)
+    ).
+
+
+
+% ----------------------- AI AGAINST AI MODE ---------------------------
+startGame(AI1, AI2):-
+  nl, nl,
+  write('============================================'),nl,
+  write('       YOU ARE NOW PLAYING FINES'),nl,
+  write('============================================'),nl,nl,
+  initialBoard(BOARD), %creates initial board
+  P is AI1.
+  playingMenu(BOARD, P).
+
+playingMenu(BOARD, P):-
+  checkGameEnd(BOARD),
+  !,
+  write('Game Ended !'), nl,
+  countPoints(BOARD, C1, C2),
+  write('Player1 pontuation: '), write(C1), nl,
+  write('Computer pontuation: '), write(C2), nl, nl
+  write('The winner is ').
+
+playingMenu(BOARD, P):-
+  printBoard(BOARD),
+  write('Computer will play'),
+  AI_turn(), %%%%%%%%%% NOT IMPLEMENTED YET %%%%%%%%%%%
+  printBoard(BOARD),
+  endTurn(BOARD, P).
