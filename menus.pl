@@ -79,8 +79,8 @@ playingMenu(BOARD):-
   write('IS YOUR TURN'),nl,nl,
   printBoard(BOARD),
   write('1- Add Piece'), nl,
-  write('2- Move Piece'), nl,
-  write('3- Add Fence'), nl, %not sure if u must add a fence after you move
+  write('2- Move Piece and Add Fence'), nl,
+  write('3- Pass Turn'), nl,
   write('4- End Game'), nl,
   read(X),
   gameMenuOption(X).
@@ -89,7 +89,7 @@ gameMenuOption(X):-
   (
     X = 1 -> addPiece(BOARD, P);
     X = 2 -> movePiece(BOARD, P);
-    X = 3 -> addFence(BOARD, P);
+    X = 3 -> passTurn(BOARD, P);
     X = 4 -> (write('Game Ended!'),nl, fines);
     (write('Wrong Choice!'),nl,playingMenu)
   ).

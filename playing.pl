@@ -79,13 +79,15 @@ addPiece(BOARD, P):-
   playingMenu(BOARD, P).
 
 
-movePiece(BOARD, P):-
+movePiece(BOARD, P, POSITION1, POSITION2):-
   %ask for the piece you want to move
   write('Please choose the piece you want to move'),
   askPosition(ORI1, ORI2),
   checkPieceToMove(P, ORI1, ORI2),
   !,
   %ask for the final position of the movement
+  POSITION1 = ORI1, %use this for replace once ORI was changed
+  POSITION2 = ORI2, %use this for replace once ORI was changed
   write('Please introduce the piece final position'),
   askPosition(POS1, POS2),
   checkMovement(BOARD, ORI1, ORI2, POS1, POS2), %%% NOT IMPLEMENTED %%%
@@ -93,12 +95,11 @@ movePiece(BOARD, P):-
 %  replace(), %remove piece from ORI
 %  replace(), %add piece to POS
   printBoard(BOARD),
-  addFence(BOARD, P), %%% NOT SURE IF I MUST IMPLEMENT THIS HERE
+  addFence(BOARD, P),
   endTurn(BOARD, P).
-/*
-addFence(BOARD, P):-
-  .*/
 
+passTurn(BOARD, P):-
+  endTurn(BOARD, P).
 %%%%%%%%%%%%%%%%%%%%%%%%%%%% GAME FUNCTIONS %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 /*
 checkGameEnd(BOARD):- %%%%%%%% UNFINISHED %%%%%%%%
@@ -142,7 +143,8 @@ checkPieceToMove(BOARD, POS1, POS2, Line, SPACE):-
   nth0(POS2, BOARD, SPACE),
   SPACE = 0.
 
-checkMovement(BOARD, POS1, POS2, Line, SPACE):-
+
+checkMovement(BOARD, ORI1, ORI2, POS1, POS2, Line, SPACE):-
   %checks if the position is a piece position and if its empty
   R is POS1 mod 2,
   R \= 0,
@@ -150,8 +152,101 @@ checkMovement(BOARD, POS1, POS2, Line, SPACE):-
   R is POS2 mod 2,
   R \= 0,
   nth0(POS2, BOARD, SPACE),
-  SPACE = 0.
-/*  !,
-  % verify path to destination
-  .
-*/
+  SPACE = 0,
+  !,
+  evaluatePositions(ORI1, ORI2, POS1, POS2).
+
+checkMovement(BOARD, P):-
+  write('The introduced position is not valid'),
+  movePiece(BOARD, P).
+
+evaluatePositions(ORI1, ORI2, POS1, POS2):-
+  POS1 = ORI1,
+  POS2 = ORI2.
+
+evaluatePositions(ORI1, ORI2, POS1, POS2):-
+  POS1 > ORI1,
+  POS2 > ORI2,
+  ORI1 is ORI1 + 1,
+  openFence(ORI1, ORI2),
+  ORI1 is ORI1 + 1,
+  emptySpace(ORI1, ORI2),
+  evaluatePositions(ORI1, ORI2, POS1, POS2).
+
+evaluatePositions(ORI1, ORI2, POS1, POS2):-
+  POS1 < ORI1,
+  POS2 < ORI2,
+  ORI1 is ORI1 - 1,
+  openFence(ORI1, ORI2),
+  ORI1 is ORI1 - 1,
+  emptySpace(ORI1, ORI2),
+  evaluatePositions(ORI1, ORI2, POS1, POS2).
+
+evaluatePositions(ORI1, ORI2, POS1, POS2):-
+  POS1 < ORI1,
+  POS2 > ORI2,
+  ORI2 is ORI2 + 1,
+  openFence(ORI1, ORI2),
+  ORI2 is ORI2 + 1,
+  emptySpace(ORI1, ORI2),
+  evaluatePositions(ORI1, ORI2, POS1, POS2).
+
+evaluatePositions(ORI1, ORI2, POS1, POS2):-
+  POS1 > ORI1,
+  POS2 < ORI2,
+  ORI2 is ORI2 - 1,
+  openFence(ORI1, ORI2),
+  ORI2 is ORI2 - 1,
+  emptySpace(ORI1, ORI2),
+  evaluatePositions(ORI1, ORI2, POS1, POS2).
+
+evaluatePositions(ORI1, ORI2, POS1, POS2):-
+  POS1 > ORI1,
+  POS2 = ORI2,
+  ORI1 is ORI1 + 1,
+  openFence(ORI1, ORI2),
+  ORI1 is ORI1 + 1,
+  emptySpace(ORI1, ORI2),
+  evaluatePositions(ORI1, ORI2, POS1, POS2).
+
+evaluatePositions(ORI1, ORI2, POS1, POS2):-
+  POS1 = ORI1,
+  POS2 > ORI2,
+  ORI2 is ORI2 + 1,
+  openFence(ORI1, ORI2),
+  ORI2 is ORI2 + 1,
+  emptySpace(ORI1, ORI2),
+  evaluatePositions(ORI1, ORI2, POS1, POS2).
+
+evaluatePositions(ORI1, ORI2, POS1, POS2):-
+  POS1 < ORI1,
+  POS2 = ORI2,
+  ORI1 is ORI1 - 1,
+  openFence(ORI1, ORI2),
+  ORI1 is ORI1 - 1,
+  emptySpace(ORI1, ORI2),
+  evaluatePositions(ORI1, ORI2, POS1, POS2).
+
+evaluatePositions(ORI1, ORI2, POS1, POS2):-
+  POS1 = ORI1,
+  POS2 < ORI2,
+  ORI2 is ORI2 - 1,
+  openFence(ORI1, ORI2),
+  ORI2 is ORI2 - 1,
+  emptySpace(ORI1, ORI2),
+  evaluatePositions(ORI1, ORI2, POS1, POS2).
+
+openFence(ORI1, ORI2, BOARD, Line):-
+  nth0(ORI1, BOARD, Line),
+  nth0(ORI2, Line, Elem),
+  Elem = 3.
+
+openFence(ORI1, ORI2, BOARD, Line):-
+  nth0(ORI1, BOARD, Line),
+  nth0(ORI2, Line, Elem),
+  Elem = 6.
+
+emptySpace(ORI1, ORI2, BOARD, Line):-
+  nth0(ORI1, BOARD, Line),
+  nth0(ORI2, Line, Elem),
+  Elem = 0.
