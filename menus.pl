@@ -35,6 +35,7 @@ playersMenu:-
   P2=[Y, 1], nl, %creates player using a list (1st element == name, 2nd element == number of pieces in the board, 3rd element == if is player's turn is 'T' else is 'F')
   startGame(P1, P2).
 
+/*
 players_AI_Menu:-
   nl,nl,
   write('============================================'),nl,
@@ -51,28 +52,28 @@ aI_AI_Menu:-
   AI1,
   AI2,
   startGame(AI1, AI2).
-
+*/
 
 % ----------------------- PLAYER AGAINST PLAYER MODE ---------------------------
-startGame(P1, P2):-
+startGame(P, P1, BOARD):-
   nl, nl,
   write('============================================'),nl,
   write('       YOU ARE NOW PLAYING FINES'),nl,
   write('============================================'),nl,nl,
   initialBoard(BOARD), %creates initial board
-  P is P1.
-  playingMenu(BOARD, P).
+  P is P1,
+  playingMenu(BOARD).
 
-playingMenu(BOARD, P):-
+playingMenu(BOARD):-
   checkGameEnd(BOARD),
   !,
   write('Game Ended !'), nl,
-  countPoints(BOARD, Pp1, Pp2),
-  write('Players1 pontuation: '), write(Pp1), nl,
-  write('Players2 pontuation: '), write(Pp2), nl, nl
+  countPoints(BOARD, P1, P2),
+  write('Players1 pontuation: '), write(P1), nl,
+  write('Players2 pontuation: '), write(P2), nl, nl,
   write('The winner is ').
 
-playingMenu(BOARD, P):-
+playingMenu(BOARD):-
   nl, nl,
   write('============================================'),nl,
   write('IS YOUR TURN'),nl,nl,
@@ -86,15 +87,15 @@ playingMenu(BOARD, P):-
 
 gameMenuOption(X):-
   (
-    X = 1 -> addPiece;
-    X = 2 -> movePiece;
-    X = 3 -> addFence;
+    X = 1 -> addPiece(BOARD, P);
+    X = 2 -> movePiece(BOARD, P);
+    X = 3 -> addFence(BOARD, P);
     X = 4 -> (write('Game Ended!'),nl, fines);
     (write('Wrong Choice!'),nl,playingMenu)
   ).
 
 
-
+/*
   % ----------------------- PLAYER AGAINST AI MODE ---------------------------
   startGame(P1, AI):-
     nl, nl,
@@ -171,3 +172,4 @@ playingMenu(BOARD, P):-
   AI_turn(), %%%%%%%%%% NOT IMPLEMENTED YET %%%%%%%%%%%
   printBoard(BOARD),
   endTurn(BOARD, P).
+*/

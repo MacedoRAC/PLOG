@@ -27,7 +27,7 @@ initialBoard([
             [3, 6, 3, 6, 3, 6, 3, 6, 3, 6, 3, 6, 3], %fences line
             [0, 3, 0, 3, 0, 3, 0, 3, 0, 3, 0, 3, 0], % pieces
             [3, 6, 3, 6, 3, 6, 3, 6, 3, 6, 3, 6, 3], %fences line
-            [0, 3, 0, 3, 0, 3, 0, 3, 0, 3, 0, 3, 0], % pieces
+            [0, 3, 0, 3, 0, 3, 0, 3, 0, 3, 0, 3, 0] % pieces
             ]).
 
 
@@ -36,6 +36,7 @@ printBoard([]).
 printBoard_line([]).
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%% MARIO VÊ %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+/*
 printBoard_line([H|T]):-
   translateChar(H,X),
   write(X),
@@ -45,3 +46,4 @@ printBoard([H|T]):-
   printBoard_line(H),
   nl,
   printBoard(T).
+*/
