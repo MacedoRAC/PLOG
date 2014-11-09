@@ -79,7 +79,7 @@ playingMenu(BOARD, P):-
   printBoard(BOARD),
   write('1- Add Piece'), nl,
   write('2- Move Piece'), nl,
-  write('3- Add Fence'), nl, %not sure if u must add a piece after you move
+  write('3- Add Fence'), nl, %not sure if u must add a fence after you move
   write('4- End Game'), nl,
   read(X),
   gameMenuOption(X).
@@ -115,7 +115,7 @@ gameMenuOption(X):-
     write('The winner is ').
 
   playingMenu(BOARD, P):-
-    P == P1,
+    P = P1,
     !,
     nl, nl,
     write('============================================'),nl,
