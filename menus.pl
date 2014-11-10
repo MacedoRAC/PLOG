@@ -55,16 +55,18 @@ aI_AI_Menu:-
 */
 
 % ----------------------- PLAYER AGAINST PLAYER MODE ---------------------------
-startGame(P, P1, BOARD):-
+startGame(P1, BOARD):-
   nl, nl,
   write('============================================'),nl,
   write('       YOU ARE NOW PLAYING FINES'),nl,
   write('============================================'),nl,nl,
   initialBoard(BOARD), %creates initial board
   P is P1,
-  playingMenu(BOARD).
+  playingMenu(BOARD, P).
 
 playingMenu(BOARD):-
+  !,
+  write('TESTING GAME OVER'),
   checkGameEnd(BOARD),
   !,
   write('Game Ended !'), nl,
@@ -73,7 +75,7 @@ playingMenu(BOARD):-
   write('Players2 pontuation: '), write(P2), nl, nl,
   write('The winner is ').
 
-playingMenu(BOARD):-
+playingMenu(BOARD, 1):-
   nl, nl,
   write('============================================'),nl,
   write('IS YOUR TURN'),nl,nl,
@@ -83,15 +85,16 @@ playingMenu(BOARD):-
   write('3- Pass Turn'), nl,
   write('4- End Game'), nl,
   read(X),
-  gameMenuOption(X).
+  gameMenuOption(X, Board, P).
 
-gameMenuOption(X):-
+gameMenuOption(X, BOARD, 1):-
   (
-    X = 1 -> addPiece(BOARD, P);
-    X = 2 -> movePiece(BOARD, P);
-    X = 3 -> passTurn(BOARD, P);
+    X = 1 -> addPiece(BOARD, 1);
+    X = 2 -> movePiece(BOARD, 1);
+    X = 3 -> passTurn(BOARD, 1);
     X = 4 -> (write('Game Ended!'),nl, fines);
-    (write('Wrong Choice!'),nl,playingMenu)
+    (write('Wrong Choice!'),nl,
+    playingMenu(BOARD, 1))
   ).
 
 

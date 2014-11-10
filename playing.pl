@@ -42,23 +42,24 @@ checkIfPossible(BOARD, P, POS1, POS2, LINE1):-
 checkIfPossible:-
   write('This position isnt available to place a new piece').
 
-addCorrectPiece(BOARD, P, P1, POS1, POS2):-
+addCorrectPiece(BOARD, P, P1, POS1, POS2, Line):-
   P = P1, !,
-  %%% calculate index
-  INDEX = POS1 + POS2, %not CORRECT AT ALL
-  replace(BOARD, INDEX, 1, BOARD), %%% NOT SURE IF REPLACE WILL WORK PROPERLY %%%
+  nth0(POS1, BOARD, Line),
+  replace(POS2, 1, Line, Line),
+  replace(POS1, Line, Board, Board),
   write('A new piece was sucssecfully placed').
 
 addCorrectPiece(BOARD, POS1, POS2):-
-  %%% calculate index
-  INDEX = POS1 + POS2, %not CORRECT AT ALL
-  replace(BOARD, INDEX, 2, BOARD), %%% NOT SURE IF REPLACE WILL WORK PROPERLY %%%
+  nth0(POS1, BOARD, Line),
+  replace(POS2, 1, Line, Line),
+  replace(POS1, Line, Board, Board),
   write('A new piece was sucssecfully placed').
+
 /*
 findPath(P, BOARD, POS1, POS2):-  %%%%% NOT IMPLEMENTED YET %%%%%
-  .
+  .*/
 %%%%%%%%%%%%%%%%%%%%%%%%%%%% PLAYING OPTIONS %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-*/
+
 addPiece(BOARD, P):-
   %count number of pieces in order to check if the player can add another one
   countPieces(BOARD, P),
@@ -90,16 +91,44 @@ movePiece(BOARD, P, POSITION1, POSITION2):-
   POSITION2 = ORI2, %use this for replace once ORI was changed
   write('Please introduce the piece final position'),
   askPosition(POS1, POS2),
-  checkMovement(BOARD, ORI1, ORI2, POS1, POS2), %%% NOT IMPLEMENTED %%%
+  checkMovement(BOARD, ORI1, ORI2, POS1, POS2),
   %moves the piece
-%  replace(), %remove piece from ORI
-%  replace(), %add piece to POS
+  movesPiece(BOARD, POSITION1, POSITION2, POS1, POS2, P),
   printBoard(BOARD),
-  addFence(BOARD, P),
+  addFence(BOARD, POS1, POS2),
   endTurn(BOARD, P).
+
+addFence(BOARD, POS1, POS2):-
+  write('Introduce where you want to add a fence')
+  ( openFence(BOARD, POS1+1, POS2) = true -> write('down')),
+  ( openFence(BOARD, POS1-1, POS2) = true -> write('up')),
+  ( openFence(BOARD, POS1, POS2+1) = true -> write('right')),
+  ( openFence(BOARD, POS1+1, POS2-1) = true -> write('left')),
+  read(X),
+  addFenceOptions(X).
+
+addFenceOptions(BOARD, POS1, POS2, X, Line):-
+  (
+    X = 'down' -> nth0(POS1-1, BOARD, Line),
+                  replace(POS2, 5, Line, Line),
+                  replace(POS1-1, Line, Board, Board);
+    X = 'up' -> nth0(POS1+1, BOARD, Line),
+                replace(POS2, 5, Line, Line),
+                replace(POS1+1, Line, Board, Board);
+    X = 'right' -> nth0(POS1, BOARD, Line),
+                  replace(POS2+1, 4, Line, Line),
+                  replace(POS1, Line, Board, Board);
+    X = 'left' -> nth0(POS1, BOARD, Line),
+                  replace(POS2-1, 4, Line, Line),
+                  replace(POS1, Line, Board, Board);
+    (write('Wrong Choice!'),nl,
+    addFence(BOARD, POS1, POS2))
+  ).
 
 passTurn(BOARD, P):-
   endTurn(BOARD, P).
+
+
 %%%%%%%%%%%%%%%%%%%%%%%%%%%% GAME FUNCTIONS %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 /*
 checkGameEnd(BOARD):- %%%%%%%% UNFINISHED %%%%%%%%
@@ -118,6 +147,7 @@ endTurn(BOARD, P, P1, P2):-
 endTurn(BOARD, P, P1):-
   P is P1,
   playingMenu(BOARD, P).
+
 /*
 checkAreas():-
   .
@@ -250,3 +280,30 @@ emptySpace(ORI1, ORI2, BOARD, Line):-
   nth0(ORI1, BOARD, Line),
   nth0(ORI2, Line, Elem),
   Elem = 0.
+
+
+movesPiece(BOARD, POSITION1, POSITION2, POS1, POS2, P):-
+  POSITION1 = POS1,
+  POSITION2 = POS2.
+
+movesPiece(BOARD, POSITION1, POSITION2, POS1, POS2, P):-
+  P = P1,
+  !,
+  %erases original piece
+  nth0(POSITION1, BOARD, Line),
+  replace(POSITION2, 0, Line, Line),
+  replace(POSITION1, Line, Board, Board),
+  %places moved piece
+  nth0(POS1, BOARD, Line),
+  replace(POS2, 1, Line, Line),
+  replace(POS1, Line, Board, Board).
+
+movesPiece(BOARD, POSITION1, POSITION2, POS1, POS2, P):-
+  %erases original piece
+  nth0(POSITION1, BOARD, Line),
+  replace(POSITION2, 0, Line, Line),
+  replace(POSITION1, Line, Board, Board),
+  %places moved piece
+  nth0(POS1, BOARD, Line),
+  replace(POS2, 1, Line, Line),
+  replace(POS1, Line, Board, Board).
