@@ -1,3 +1,51 @@
+% -------------------------BOARD INITIALIZATION---------------------------------
+
+
+initialBoard([
+            [3, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 3],
+            [4, 0, 3, 0, 3, 0, 3, 0, 3, 0, 3, 0, 3, 0, 4], % pieces
+            [4, 3, 6, 3, 6, 3, 6, 3, 6, 3, 6, 3, 6, 3, 4], %fences line
+            [4, 0, 3, 0, 3, 0, 3, 0, 3, 0, 3, 0, 3, 0, 4], % pieces
+            [4, 3, 6, 3, 6, 3, 6, 3, 6, 3, 6, 3, 6, 3, 4], %fences line
+            [4, 0, 3, 0, 3, 0, 3, 0, 3, 0, 3, 0, 3, 0, 4], % pieces
+            [4, 3, 6, 3, 6, 3, 6, 3, 6, 3, 6, 3, 6, 3, 4], %fences line
+            [4, 1, 3, 0, 3, 0, 3, 0, 3, 0, 3, 0, 3, 2, 4], % pieces
+            [4, 3, 6, 3, 6, 3, 6, 3, 6, 3, 6, 3, 6, 3, 4], %fences line
+            [4, 0, 3, 0, 3, 0, 3, 0, 3, 0, 3, 0, 3, 0, 4], % pieces
+            [4, 3, 6, 3, 6, 3, 6, 3, 6, 3, 6, 3, 6, 3, 4], %fences line
+            [4, 0, 3, 0, 3, 0, 3, 0, 3, 0, 3, 0, 3, 0, 4], % pieces
+            [4, 3, 6, 3, 6, 3, 6, 3, 6, 3, 6, 3, 6, 3, 4], %fences line
+            [4, 0, 3, 0, 3, 0, 3, 0, 3, 0, 3, 0, 3, 0, 4], % pieces
+            [4, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 4]
+            ]).
+
+
+% -------------------------------BOARD PRINTING---------------------------------
+
+translateChar(0,' '). %empty space
+translateChar(1,'x').
+translateChar(2,'o').
+translateChar(3,' '). %no fence
+translateChar(4,'|').
+translateChar(5,'_').
+translateChar(6, '+').
+
+printBoard_line([H|T]):-
+  translateChar(H,X),
+  write(X),
+  printBoard_line(T).
+
+
+printBoard([H|T]):-
+  printBoard_line(H),
+  nl,
+  printBoard(T).
+
+printBoard([]).
+printBoard_line([]).
+
+
+
 %%%%%%%%% UTILITU FUNCTIONS FOR ADD PIECES %%%%%%%%%
 pieceType(BOARD, P, P1):-
   P = P1,
@@ -54,10 +102,26 @@ addCorrectPiece(BOARD, POS1, POS2):-
   replace(POS2, 1, Line, Line),
   replace(POS1, Line, Board, Board),
   write('A new piece was sucssecfully placed').
-
 /*
 findPath(P, BOARD, POS1, POS2):-  %%%%% NOT IMPLEMENTED YET %%%%%
-  .*/
+  %looks for pieces in the board
+
+  %for each piece get its position
+
+  %checks if its posible the movement between any piece
+  %on the board and the final position
+  checkMovement().
+
+findPath(P, BOARD, POS1, POS2):-
+  %looks for pieces in the board
+
+  %for each piece get its position
+
+  %checks if its posible the movement between the final
+  %position and some piece on the board
+  checkMovement().
+*/
+
 %%%%%%%%%%%%%%%%%%%%%%%%%%%% PLAYING OPTIONS %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 addPiece(BOARD, P):-
@@ -99,7 +163,7 @@ movePiece(BOARD, P, POSITION1, POSITION2):-
   endTurn(BOARD, P).
 
 addFence(BOARD, POS1, POS2):-
-  write('Introduce where you want to add a fence')
+  write('Introduce where you want to add a fence'),
   ( openFence(BOARD, POS1+1, POS2) = true -> write('down')),
   ( openFence(BOARD, POS1-1, POS2) = true -> write('up')),
   ( openFence(BOARD, POS1, POS2+1) = true -> write('right')),
@@ -138,14 +202,14 @@ checkGameEnd(BOARD):- %%%%%%%% UNFINISHED %%%%%%%%
 lookForWinner():- %not sure if it's needed
   .*/
 
-endTurn(BOARD, P, P1, P2):-
-  P = P1,
+endTurn(BOARD, P):-
+  P = 1,
   !,
-  P is P2,
+  P is 2,
   playingMenu(BOARD, P).
 
-endTurn(BOARD, P, P1):-
-  P is P1,
+endTurn(BOARD, P):-
+  P is 1,
   playingMenu(BOARD, P).
 
 /*

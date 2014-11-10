@@ -1,3 +1,6 @@
+:-use_module(library(lists)),
+  consult(playing).
+
 % --------------------------------- MENUS --------------------------------------
 fines:-
   mainMenu,
@@ -33,7 +36,8 @@ playersMenu:-
   write('Player 2 -o- '),
   read(Y),
   P2=[Y, 1], nl, %creates player using a list (1st element == name, 2nd element == number of pieces in the board, 3rd element == if is player's turn is 'T' else is 'F')
-  startGame(P1, P2).
+  initialBoard(BOARD), %creates initial board
+  startGame(P1, BOARD).
 
 /*
 players_AI_Menu:-
@@ -60,12 +64,11 @@ startGame(P1, BOARD):-
   write('============================================'),nl,
   write('       YOU ARE NOW PLAYING FINES'),nl,
   write('============================================'),nl,nl,
-  initialBoard(BOARD), %creates initial board
-  P is P1,
+  printBoard(BOARD),
+  P is 1,
   playingMenu(BOARD, P).
 
 playingMenu(BOARD):-
-  !,
   write('TESTING GAME OVER'),
   checkGameEnd(BOARD),
   !,
