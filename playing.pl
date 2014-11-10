@@ -1,6 +1,4 @@
 % -------------------------BOARD INITIALIZATION---------------------------------
-
-
 initialBoard([
             [3, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 3],
             [4, 0, 3, 0, 3, 0, 3, 0, 3, 0, 3, 0, 3, 0, 4], % pieces
@@ -21,7 +19,6 @@ initialBoard([
 
 
 % -------------------------------BOARD PRINTING---------------------------------
-
 translateChar(0,' '). %empty space
 translateChar(1,'x').
 translateChar(2,'o').
@@ -35,7 +32,6 @@ printBoard_line([H|T]):-
   write(X),
   printBoard_line(T).
 
-
 printBoard([H|T]):-
   printBoard_line(H),
   nl,
@@ -45,82 +41,6 @@ printBoard([]).
 printBoard_line([]).
 
 
-
-%%%%%%%%% UTILITU FUNCTIONS FOR ADD PIECES %%%%%%%%%
-pieceType(BOARD, P, P1):-
-  P = P1,
-  !,
-  member(1, BOARD).
-
-pieceType(BOARD):-
-  member(2, BOARD).
-
-countPieces(BOARD, P, N):-
-  N < 7,
-  !,
-  pieceType(BOARD, P), %% NOT SURE IF WORKING
-  N is N+1,
-  countPieces(BOARD, P, N).
-
-countPieces(N):-
-  N >= 7, !, fail.
-
-placePiece(BOARD, P, POS1, POS2):-
-  checkIfPossible(BOARD, P, POS1, POS2), !,
-  addCorrectPiece(BOARD, P, POS1, POS2).
-
-placePiece(BOARD, P):-
-  write('You are not allowed to place a piece here'), nl,
-  write('please choose another position'), nl, nl,
-  addPiece(BOARD, P).
-
-checkIfPossible(BOARD, P, POS1, POS2, LINE1):-
-  %checks if there isnt any piece there
-  R is POS1 mod 2,
-  R \= 0,
-  R is POS2 mod 2,
-  R \= 0,
-  nth0(POS1, BOARD, LINE1),
-  ntho(POS2, LINE1, Elem),
-  Elem = 0,
-  !,
-  %looks for a path
-  findPath(P, BOARD, POS1, POS2). %%% NOT IMPLEMENTED YET
-
-checkIfPossible:-
-  write('This position isnt available to place a new piece').
-
-addCorrectPiece(BOARD, P, P1, POS1, POS2, Line):-
-  P = P1, !,
-  nth0(POS1, BOARD, Line),
-  replace(POS2, 1, Line, Line),
-  replace(POS1, Line, Board, Board),
-  write('A new piece was sucssecfully placed').
-
-addCorrectPiece(BOARD, POS1, POS2):-
-  nth0(POS1, BOARD, Line),
-  replace(POS2, 1, Line, Line),
-  replace(POS1, Line, Board, Board),
-  write('A new piece was sucssecfully placed').
-/*
-findPath(P, BOARD, POS1, POS2):-  %%%%% NOT IMPLEMENTED YET %%%%%
-  %looks for pieces in the board
-
-  %for each piece get its position
-
-  %checks if its posible the movement between any piece
-  %on the board and the final position
-  checkMovement().
-
-findPath(P, BOARD, POS1, POS2):-
-  %looks for pieces in the board
-
-  %for each piece get its position
-
-  %checks if its posible the movement between the final
-  %position and some piece on the board
-  checkMovement().
-*/
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%% PLAYING OPTIONS %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
@@ -144,49 +64,53 @@ addPiece(BOARD, P):-
   playingMenu(BOARD, P).
 
 
-movePiece(BOARD, P, POSITION1, POSITION2):-
+movePiece(BOARD, P):-
   %ask for the piece you want to move
   write('Please choose the piece you want to move'),
   askPosition(ORI1, ORI2),
   checkPieceToMove(P, ORI1, ORI2),
   !,
-  %ask for the final position of the movement
   POSITION1 = ORI1, %use this for replace once ORI was changed
   POSITION2 = ORI2, %use this for replace once ORI was changed
+  %ask for the final position of the movement
   write('Please introduce the piece final position'),
   askPosition(POS1, POS2),
   checkMovement(BOARD, ORI1, ORI2, POS1, POS2),
   %moves the piece
   movesPiece(BOARD, POSITION1, POSITION2, POS1, POS2, P),
   printBoard(BOARD),
+  %adding a fence
   addFence(BOARD, POS1, POS2),
   endTurn(BOARD, P).
+
+movePiece(BOARD, P):-
+  write('you cant move the selected piece'),
+  playingMenu(BOARD, P)
 
 addFence(BOARD, POS1, POS2):-
   write('Introduce where you want to add a fence'),
   ( openFence(BOARD, POS1+1, POS2) = true -> write('down')),
   ( openFence(BOARD, POS1-1, POS2) = true -> write('up')),
   ( openFence(BOARD, POS1, POS2+1) = true -> write('right')),
-  ( openFence(BOARD, POS1+1, POS2-1) = true -> write('left')),
+  ( openFence(BOARD, POS1, POS2-1) = true -> write('left')),
   read(X),
   addFenceOptions(X).
 
 addFenceOptions(BOARD, POS1, POS2, X, Line):-
   (
-    X = 'down' -> nth0(POS1-1, BOARD, Line),
+    X = 'down' -> nth0(POS1+1, BOARD, Line),
                   replace(POS2, 5, Line, Line),
-                  replace(POS1-1, Line, Board, Board);
-    X = 'up' -> nth0(POS1+1, BOARD, Line),
+                  replace(POS1+1, Line, Board, Board);
+    X = 'up' -> nth0(POS1-1, BOARD, Line),
                 replace(POS2, 5, Line, Line),
-                replace(POS1+1, Line, Board, Board);
+                replace(POS1-1, Line, Board, Board);
     X = 'right' -> nth0(POS1, BOARD, Line),
                   replace(POS2+1, 4, Line, Line),
                   replace(POS1, Line, Board, Board);
     X = 'left' -> nth0(POS1, BOARD, Line),
                   replace(POS2-1, 4, Line, Line),
                   replace(POS1, Line, Board, Board);
-    (write('Wrong Choice!'),nl,
-    addFence(BOARD, POS1, POS2))
+    (write('Wrong Choice!'),nl, addFence(BOARD, POS1, POS2))
   ).
 
 passTurn(BOARD, P):-
@@ -194,23 +118,81 @@ passTurn(BOARD, P):-
 
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%% GAME FUNCTIONS %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-/*
-checkGameEnd(BOARD):- %%%%%%%% UNFINISHED %%%%%%%%
-  %se nao existirem movimentos possiveis de uma equipa, o jogo acaba
-  .*/
+checkGameEnd(BOARD, P):-
+  %se nao existirem movimentos possiveis de uma jogador
+  \+ playerCanMove(BOARD, P).
+
+checkGameEnd(BOARD, P):-
+  %the total of scores is 49
+  totalScores(BOARD, P1, P2).
+
+playersCanMove(BOARD, P, IndL):-
+  P = 1,
+  IndL <= 13,
+  nth0(IndL, Board, Line),
+  member(1, Line),
+  !,
+  checkLine(Line, IndL).
+
+playersCanMove(BOARD, P, IndL):-
+  P = 1,
+  IndL is IndL + 2,
+  playersCanMove(BOARD, P, IndL).
+
+checkLine(Line, IndL):-
+  nth0(Col, Line, 1),
+  canMove(IndL, Col), !.
+  %verificar outras peças na mesma coluna
+
+checkLine(Line, IndL):-
+  playersCanMove(BOARD, P, IndL+2).
+
+canMove(IndL, Col):-
+  nth0(IndL+1, Board, LineB),
+  nth0(Col, LineB, 3),
+  nth0(IndL+2, Board, LineB),
+  nth0(Col, LineB, 0).
+
+canMove(IndL, Col):-
+  nth0(IndL-1, Board, LineB),
+  nth0(Col, LineB, 3),
+  nth0(IndL-2, Board, LineB),
+  nth0(Col, LineB, 0).
+
+canMove(IndL, Col):-
+  nth0(IndL, Board, LineB),
+  nth0(Col+1, LineB, 3),
+  nth0(IndL, Board, LineB),
+  nth0(Col+2, LineB, 0).
+
+canMove(IndL, Col):-
+  nth0(IndL, Board, LineB),
+  nth0(Col-1, LineB, 3),
+  nth0(IndL, Board, LineB),
+  nth0(Col-2, LineB, 0).
+
+totalScores(BOARD, P1, P2):-
+  calculateScore(P1),
+  calculateScore(P2),
+  nth0(2, P1, S1),
+  nth0(2, P2, S2),
+  S is S1 + S2,
+  S = 49.
+
 /*
 lookForWinner():- %not sure if it's needed
   .*/
 
 endTurn(BOARD, P):-
   P = 1,
-  !,
-  P is 2,
-  playingMenu(BOARD, P).
+  P1 is 2,
+  playingMenu(BOARD, P1).
 
 endTurn(BOARD, P):-
-  P is 1,
-  playingMenu(BOARD, P).
+  P = 2,
+  P1 is 1,
+  playingMenu(BOARD, P1).
+
 
 /*
 checkAreas():-
@@ -218,6 +200,98 @@ checkAreas():-
 
 checkPossibleMoves():-
   .*/
+
+
+
+%%%%%%%%% UTILITU FUNCTIONS FOR ADD PIECES %%%%%%%%%
+pieceNumber(P, Np):-
+  P=1,
+  !,
+  nth0(1, P1, Np).
+
+pieceNumber(P, Np):-
+  nth0(1, P2, Np)
+
+countPieces(BOARD, P):-
+  pieceNumber(P, Np),
+  Np < 7,
+  !,
+  addPiece(P).
+
+countPieces(BOARD, P):-
+  write('you cant add any more pieces'),
+  playingMenu(BOARD, P).
+
+placePiece(BOARD, P, POS1, POS2):-
+  checkIfPossible(BOARD, P, POS1, POS2), !,
+  addCorrectPiece(BOARD, P, POS1, POS2),
+  updateNumeberOfPieces(P).
+
+updateNumeberOfPieces(P):-
+  P = 1,
+  nth0(1, P1, NumbP),
+  NumbP is NumbP + 1,
+  replace(1, NumbP, P1, P1).
+
+updateNumeberOfPieces(P):-
+  P = 2,
+  nth0(1, P2, NumbP),
+  NumbP is NumbP + 1,
+  replace(1, NumbP, P2, P2).
+
+placePiece(BOARD, P):-
+  write('You are not allowed to place a piece here'), nl, nl,
+  playingMenu(BOARD, P).
+
+checkIfPossible(BOARD, P, POS1, POS2, LINE1):-
+  %checks if there isnt any piece there
+  R is POS1 mod 2,
+  R \= 0,
+  R is POS2 mod 2,
+  R \= 0,
+  nth0(POS1, BOARD, LINE1),
+  ntho(POS2, LINE1, Elem),
+  Elem = 0,
+  !,
+  %looks for a path
+  findPath(P, BOARD, POS1, POS2). %%% NOT IMPLEMENTED YET
+
+checkIfPossible:-
+  write('This position isnt available to place a new piece').
+
+addCorrectPiece(BOARD, P, P1, POS1, POS2, Line):-
+  P = 1,
+  nth0(POS1, BOARD, Line),
+  replace(POS2, 1, Line, Line),
+  replace(POS1, Line, Board, Board),
+  write('A new piece was sucssecfully placed').
+
+addCorrectPiece(BOARD, POS1, POS2):-
+  P = 2,
+  nth0(POS1, BOARD, Line),
+  replace(POS2, 2, Line, Line),
+  replace(POS1, Line, Board, Board),
+  write('A new piece was sucssecfully placed').
+
+/*
+findPath(P, BOARD, POS1, POS2):-  %%%%% NOT IMPLEMENTED YET %%%%%
+  %looks for pieces in the board
+
+  %for each piece get its position
+
+  %checks if its posible the movement between any piece
+  %on the board and the final position
+  checkMovement().
+
+findPath(P, BOARD, POS1, POS2):-
+  %looks for pieces in the board
+
+  %for each piece get its position
+
+  %checks if its posible the movement between the final
+  %position and some piece on the board
+  checkMovement().
+*/
 
 
 %%%%%%%%%%%%%%%%%% UTILITY FUNCTIONS FOR MOVE PIECE %%%%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -252,7 +326,7 @@ checkMovement(BOARD, ORI1, ORI2, POS1, POS2, Line, SPACE):-
 
 checkMovement(BOARD, P):-
   write('The introduced position is not valid'),
-  movePiece(BOARD, P).
+  playingMenu(BOARD, P).
 
 evaluatePositions(ORI1, ORI2, POS1, POS2):-
   POS1 = ORI1,
@@ -351,8 +425,7 @@ movesPiece(BOARD, POSITION1, POSITION2, POS1, POS2, P):-
   POSITION2 = POS2.
 
 movesPiece(BOARD, POSITION1, POSITION2, POS1, POS2, P):-
-  P = P1,
-  !,
+  P = 1,
   %erases original piece
   nth0(POSITION1, BOARD, Line),
   replace(POSITION2, 0, Line, Line),
@@ -363,11 +436,12 @@ movesPiece(BOARD, POSITION1, POSITION2, POS1, POS2, P):-
   replace(POS1, Line, Board, Board).
 
 movesPiece(BOARD, POSITION1, POSITION2, POS1, POS2, P):-
+  P = 2,
   %erases original piece
   nth0(POSITION1, BOARD, Line),
   replace(POSITION2, 0, Line, Line),
   replace(POSITION1, Line, Board, Board),
   %places moved piece
   nth0(POS1, BOARD, Line),
-  replace(POS2, 1, Line, Line),
+  replace(POS2, 2, Line, Line),
   replace(POS1, Line, Board, Board).
