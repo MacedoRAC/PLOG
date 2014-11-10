@@ -32,10 +32,10 @@ playersMenu:-
   write('TIME TO CHOOSE YOUR BATTLE NAME'),nl,nl,
   write('Player 1 -x- '),
   read(X),
-  P1=[X, 1], nl, %creates player using a list (1st element == name, 2nd element == number of pieces in the board, 3rd element == if is player's turn is 'T' else is 'F')
+  P1=[X, 1, 0], nl, %creates player using a list (1st element == name, 2nd element == number of pieces in the board, 3rd element == if is player's turn is 'T' else is 'F')
   write('Player 2 -o- '),
   read(Y),
-  P2=[Y, 1], nl, %creates player using a list (1st element == name, 2nd element == number of pieces in the board, 3rd element == if is player's turn is 'T' else is 'F')
+  P2=[Y, 1, 0], nl, %creates player using a list (1st element == name, 2nd element == number of pieces in the board, 3rd element == if is player's turn is 'T' else is 'F')
   initialBoard(BOARD), %creates initial board
   startGame(P1, BOARD).
 
@@ -68,8 +68,7 @@ startGame(P1, BOARD):-
   P is 1,
   playingMenu(BOARD, P).
 
-playingMenu(BOARD):-
-  write('TESTING GAME OVER'),
+playingMenu(BOARD, P):-
   checkGameEnd(BOARD),
   !,
   write('Game Ended !'), nl,
@@ -78,7 +77,7 @@ playingMenu(BOARD):-
   write('Players2 pontuation: '), write(P2), nl, nl,
   write('The winner is ').
 
-playingMenu(BOARD, 1):-
+playingMenu(BOARD, P):-
   nl, nl,
   write('============================================'),nl,
   write('IS YOUR TURN'),nl,nl,
@@ -90,14 +89,13 @@ playingMenu(BOARD, 1):-
   read(X),
   gameMenuOption(X, Board, P).
 
-gameMenuOption(X, BOARD, 1):-
+gameMenuOption(X, BOARD, P):-
   (
-    X = 1 -> addPiece(BOARD, 1);
-    X = 2 -> movePiece(BOARD, 1);
-    X = 3 -> passTurn(BOARD, 1);
+    X = 1 -> addPiece(BOARD, P);
+    X = 2 -> movePiece(BOARD, P);
+    X = 3 -> passTurn(BOARD, P);
     X = 4 -> (write('Game Ended!'),nl, fines);
-    (write('Wrong Choice!'),nl,
-    playingMenu(BOARD, 1))
+    (write('Wrong Choice!'),nl, playingMenu(BOARD, P))
   ).
 
 
