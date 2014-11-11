@@ -69,7 +69,7 @@ startGame(P1, BOARD):-
   playingMenu(BOARD, P).
 
 playingMenu(BOARD, P):-
-  checkGameEnd(BOARD),
+  checkGameEnd(BOARD, P),
   !,
   write('Game Ended !'), nl,
   countPoints(BOARD, P1, P2),

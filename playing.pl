@@ -120,7 +120,7 @@ passTurn(BOARD, P):-
 %%%%%%%%%%%%%%%%%%%%%%%%%%%% GAME FUNCTIONS %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 checkGameEnd(BOARD, P):-
   %se nao existirem movimentos possiveis de uma jogador
-  \+ playerCanMove(BOARD, P).
+  \+ playersCanMove(BOARD, P, 1).
 
 checkGameEnd(BOARD, P):-
   NPieces = 0,
@@ -133,27 +133,27 @@ countPieces(NPieces, L):-
   L =< 13,
   nth0(L, Board, Line),
   !,
-  checkPieceLine(Line, NPieces).
+  checkPieceLine(Line, NPieces, L).
 
 countPieces(NPieces, L):-
   L > 13,
   !.
 
-checkPieceLine(Line, NPieces):-
+checkPieceLine(Line, NPieces, L):-
   nth0(Pposition, Line, 1),
   !,
   NPieces is NPieces + 1,
   replace(Pposition, 0, Line, Line),
   checkPieceLine(Line, NPieces).
 
-checkPieceLine(Line, NPieces):-
+checkPieceLine(Line, NPieces, L):-
   nth0(Pposition, Line, 2),
   !,
   NPieces is NPieces + 1,
   replace(Pposition, 0, Line, Line),
   checkPieceLine(Line, NPieces).
 
-checkPieceLine(Line, NPieces):-
+checkPieceLine(Line, NPieces, L):-
   L is L + 1,
   countPieces(NPieces, L).
 
@@ -163,7 +163,7 @@ checkAllAreas(NPieces, BOARD, Counter):-
   Counter < NPieces,
   %copia tabuleiro para board2,
   copy_term(BOARD, Board2),
-  findPiecePosition(POS1, POS2, 0),
+  findPiecePosition(POS1, POS2, 1),
   %calcArea(POS1, POS2, S1),
   deletePiece(POS1, POS2, Board2),
   Counter is Counter + 1,
@@ -173,21 +173,21 @@ checkAllAreas(NPieces, BOARD, Counter):-
   Counter = NPieces,
   !.
 
-findPiecePosition(POS1, POS2, IndLine):-
+findPiecePosition(POS1, POS2, IndLine, Board2):-
   IndLine =< 13,
   nth0(IndLine, Board2, Line),
   member(1, Line),
   ntho(POS2, Line, 1).
 
-findPiecePosition(POS1, POS2, IndLine):-
+findPiecePosition(POS1, POS2, IndLine, Board2):-
   IndLine =< 13,
   nth0(IndLine, Board2, Line),
   member(2, Line),
   ntho(POS2, Line, 2).
 
-findPiecePosition(POS1, POS2, IndLine):-
-  IndLine =< 13,
-  IndLine is IndLine + 1,
+findPiecePosition(POS1, POS2, IndLine, Board2):-
+  IndLine < 13,
+  IndLine is IndLine + 2,
   findPiecePosition(POS1, POS2, IndLine).
 
 deletePiece(POS1, POS2, Board2):-
@@ -195,55 +195,75 @@ deletePiece(POS1, POS2, Board2):-
   nth0(POS2, Line, 0),
   replace(POS1, Line, Board2, Board2).
 
-calcArea():-
-  .
+/*calcArea():-
+  .*/
 
 % - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
 playersCanMove(BOARD, P, IndL):-
-  P = 1,
   IndL =< 13,
   nth0(IndL, Board, Line),
   member(1, Line),
   !,
+  checkLine(Line, IndL). %no final incrementar Line
+
+playersCanMove(BOARD, P, IndL):-
+  IndL =< 13,
+  nth0(IndL, Board, Line),
+  member(2, Line),
+  !,
   checkLine(Line, IndL).
 
 playersCanMove(BOARD, P, IndL):-
-  P = 1,
-  IndL is IndL + 2,
+  IndL < 13,
+  !,
+  IndL is IndL+2,
   playersCanMove(BOARD, P, IndL).
 
-checkLine(Line, IndL):-
-  nth0(Col, Line, 1),
-  canMove(IndL, Col), !.
-  %verificar outras peças na mesma coluna
 
-checkLine(Line, IndL):-
-  playersCanMove(BOARD, P, IndL+2).
+checkLine(Line, IndL, BOARD):-
+  copy_term(BOARD, Board2),
+  findPiecePosition(POS1, POS2, 1, Board2),
+  !,
+  canMove(POS1, POS2, 0),
+  deletePiece(POS1, POS2, Board2),
+  checkLine(Line, IndL, Board2).
 
-canMove(IndL, Col):-
-  nth0(IndL+1, Board, LineB),
+canMove(IndL, Col, Index):-
+  IndL < 13,
+  Index is IndL+1,
+  nth0(Index, Board, LineB),
   nth0(Col, LineB, 3),
-  nth0(IndL+2, Board, LineB),
+  Index is Indl+2,
+  nth0(Index, Board, LineB),
   nth0(Col, LineB, 0).
 
-canMove(IndL, Col):-
-  nth0(IndL-1, Board, LineB),
+canMove(IndL, Col, Index):-
+  IndL > 1,
+  Index is IndL-1,
+  nth0(Index, Board, LineB),
   nth0(Col, LineB, 3),
-  nth0(IndL-2, Board, LineB),
+  Index is Indl-2,
+  nth0(Index, Board, LineB),
   nth0(Col, LineB, 0).
 
-canMove(IndL, Col):-
+canMove(IndL, Col, Index):-
+  Col < 13,
   nth0(IndL, Board, LineB),
-  nth0(Col+1, LineB, 3),
+  Index is Col+1,
+  nth0(Index,LineB, 3),
   nth0(IndL, Board, LineB),
-  nth0(Col+2, LineB, 0).
+  Index is Col+2,
+  nth0(Index, LineB, 0).
 
-canMove(IndL, Col):-
+canMove(IndL, Col, Index):-
+  Col > 1,
   nth0(IndL, Board, LineB),
-  nth0(Col-1, LineB, 3),
+  Index is Col-1,
+  nth0(Column1, LineB, 3),
   nth0(IndL, Board, LineB),
-  nth0(Col-2, LineB, 0).
+  Index is Col-2,
+  nth0(Column2, LineB, 0).
 
 
 endTurn(BOARD, P):-
@@ -264,7 +284,7 @@ pieceNumber(P, Np):-
   nth0(1, P1, Np).
 
 pieceNumber(P, Np):-
-  nth0(1, P2, Np)
+  nth0(1, P2, Np).
 
 countPieces(BOARD, P):-
   pieceNumber(P, Np),
