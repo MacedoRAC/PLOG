@@ -1,6 +1,6 @@
 % -------------------------BOARD INITIALIZATION---------------------------------
 initialBoard([
-            [3, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 3],
+            [3, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 3], %fences line
             [4, 0, 3, 0, 3, 0, 3, 0, 3, 0, 3, 0, 3, 0, 4], % pieces
             [4, 3, 6, 3, 6, 3, 6, 3, 6, 3, 6, 3, 6, 3, 4], %fences line
             [4, 0, 3, 0, 3, 0, 3, 0, 3, 0, 3, 0, 3, 0, 4], % pieces
@@ -14,7 +14,7 @@ initialBoard([
             [4, 0, 3, 0, 3, 0, 3, 0, 3, 0, 3, 0, 3, 0, 4], % pieces
             [4, 3, 6, 3, 6, 3, 6, 3, 6, 3, 6, 3, 6, 3, 4], %fences line
             [4, 0, 3, 0, 3, 0, 3, 0, 3, 0, 3, 0, 3, 0, 4], % pieces
-            [4, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 4]
+            [4, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 4]  %fences line
             ]).
 
 
@@ -120,7 +120,9 @@ passTurn(BOARD, P):-
 %%%%%%%%%%%%%%%%%%%%%%%%%%%% GAME FUNCTIONS %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 checkGameEnd(BOARD, P):-
   %se nao existirem movimentos possiveis de uma jogador
-  \+ playersCanMove(BOARD, P, 1).
+  playersCanMove(BOARD, P, 1),
+  !,
+  fail.
 
 checkGameEnd(BOARD, P):-
   NPieces = 0,
@@ -164,7 +166,7 @@ checkAllAreas(NPieces, BOARD, Counter):-
   %copia tabuleiro para board2,
   copy_term(BOARD, Board2),
   findPiecePosition(POS1, POS2, 1),
-  %calcArea(POS1, POS2, S1),
+  calcArea(POS1, POS2, BOARD),
   deletePiece(POS1, POS2, Board2),
   Counter is Counter + 1,
   checkAllAreas(NPieces, Board2, Counter).
@@ -177,12 +179,14 @@ findPiecePosition(POS1, POS2, IndLine, Board2):-
   IndLine =< 13,
   nth0(IndLine, Board2, Line),
   member(1, Line),
+  POS1 is IndLine,
   ntho(POS2, Line, 1).
 
 findPiecePosition(POS1, POS2, IndLine, Board2):-
   IndLine =< 13,
   nth0(IndLine, Board2, Line),
   member(2, Line),
+  POS1 is IndLine,
   ntho(POS2, Line, 2).
 
 findPiecePosition(POS1, POS2, IndLine, Board2):-
@@ -195,8 +199,19 @@ deletePiece(POS1, POS2, Board2):-
   nth0(POS2, Line, 0),
   replace(POS1, Line, Board2, Board2).
 
-/*calcArea():-
-  .*/
+%pesquisa toda a area delimitada pelas paredes
+calcArea(POS1, POS2, BOARD):-
+  %cria copia do Board
+  copy_term(BOARD, Board2),
+  %guardar a linha inicial
+  floodFill(Board2, POS1, POS2).
+
+floodFill(Board2, POS1, POS2):-
+  (openFence(POS1+1, POS2)->emptySpace(POS1+2, POS2, Board2, _), POS1 is POS1 + 2, floodFill(Board2, POS1, POS2)),
+  (openFence(POS1-1, POS2)->emptySpace(POS1-2, POS2, Board2, _), POS1 is POS1 - 2, floodFill(Board2, POS1, POS2)),
+  (openFence(POS1, POS2+1)->emptySpace(POS1, POS2+2, Board2, _), POS2 is POS2 + 2, floodFill(Board2, POS1, POS2)),
+  (openFence(POS1, POS2-1)->emptySpace(POS1, POS2-2, Board2, _), POS2 is POS2 - 2, floodFill(Board2, POS1, POS2)).
+
 
 % - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
@@ -328,7 +343,7 @@ checkIfPossible(BOARD, P, POS1, POS2, LINE1):-
   Elem = 0,
   !,
   %looks for a path
-  findPath(P, BOARD, POS1, POS2). %%% NOT IMPLEMENTED YET
+  findPath(BOARD, POS1, POS2, 0, 0).
 
 checkIfPossible:-
   write('This position isnt available to place a new piece').
@@ -347,25 +362,28 @@ addCorrectPiece(BOARD, POS1, POS2):-
   replace(POS1, Line, Board, Board),
   write('A new piece was sucssecfully placed').
 
-/*
-findPath(P, BOARD, POS1, POS2):-  %%%%% NOT IMPLEMENTED YET %%%%%
+
+findPath(BOARD, POS1, POS2, N, Ncount):-
+  Ncount < N,
+  (N = 0 -> nth0(1, P1, NpA), nth0(1, P2, NpB), N is NpA + NpB),
   %looks for pieces in the board
-
+  copy_term(BOARD, Board2),
   %for each piece get its position
-
+  findPiecePosition(ORI1, ORI2, 1),
   %checks if its posible the movement between any piece
   %on the board and the final position
-  checkMovement().
+  checkMovement(BOARD, ORI1, ORI2, POS1, POS2, Line, SPACE),
+  !,
+  deletePiece(ORI1, ORI2, Board2),
+  Ncount is Ncount + 1,
+  findPath(Board2, POS1, POS2, N, Ncount).
 
-findPath(P, BOARD, POS1, POS2):-
-  %looks for pieces in the board
+findPath(BOARD, POS1, POS2, N, Ncount):-
+  checkMovement(BOARD, POS1, POS2, ORI1, ORI2, Line, SPACE),
+  deletePiece(ORI1, ORI2, Board2),
+  Ncount is Ncount + 1,
+  findPath(Board2, POS1, POS2, N, Ncount).
 
-  %for each piece get its position
-
-  %checks if its posible the movement between the final
-  %position and some piece on the board
-  checkMovement().
-*/
 
 
 %%%%%%%%%%%%%%%%%% UTILITY FUNCTIONS FOR MOVE PIECE %%%%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -407,6 +425,7 @@ evaluatePositions(ORI1, ORI2, POS1, POS2):-
   POS2 = ORI2.
 
 evaluatePositions(ORI1, ORI2, POS1, POS2):-
+  ORI1 < 13,
   POS1 > ORI1,
   POS2 > ORI2,
   ORI1 is ORI1 + 1,
@@ -416,6 +435,17 @@ evaluatePositions(ORI1, ORI2, POS1, POS2):-
   evaluatePositions(ORI1, ORI2, POS1, POS2).
 
 evaluatePositions(ORI1, ORI2, POS1, POS2):-
+  ORI2 < 13,
+  POS1 > ORI1,
+  POS2 > ORI2,
+  ORI2 is ORI2 + 1,
+  openFence(ORI1, ORI2),
+  ORI2 is ORI2 + 1,
+  emptySpace(ORI1, ORI2),
+  evaluatePositions(ORI1, ORI2, POS1, POS2).
+
+evaluatePositions(ORI1, ORI2, POS1, POS2):-
+  ORI1 > 1,
   POS1 < ORI1,
   POS2 < ORI2,
   ORI1 is ORI1 - 1,
@@ -425,6 +455,17 @@ evaluatePositions(ORI1, ORI2, POS1, POS2):-
   evaluatePositions(ORI1, ORI2, POS1, POS2).
 
 evaluatePositions(ORI1, ORI2, POS1, POS2):-
+  ORI2 > 1,
+  POS1 < ORI1,
+  POS2 < ORI2,
+  ORI2 is ORI2 - 1,
+  openFence(ORI1, ORI2),
+  ORI2 is ORI2 - 1,
+  emptySpace(ORI1, ORI2),
+  evaluatePositions(ORI1, ORI2, POS1, POS2).
+
+evaluatePositions(ORI1, ORI2, POS1, POS2):-
+  ORI2 < 13,
   POS1 < ORI1,
   POS2 > ORI2,
   ORI2 is ORI2 + 1,
@@ -434,6 +475,17 @@ evaluatePositions(ORI1, ORI2, POS1, POS2):-
   evaluatePositions(ORI1, ORI2, POS1, POS2).
 
 evaluatePositions(ORI1, ORI2, POS1, POS2):-
+  ORI1 < 13,
+  POS1 < ORI1,
+  POS2 > ORI2,
+  ORI1 is ORI1 + 1,
+  openFence(ORI1, ORI2),
+  ORI1 is ORI1 + 1,
+  emptySpace(ORI1, ORI2),
+  evaluatePositions(ORI1, ORI2, POS1, POS2).
+
+evaluatePositions(ORI1, ORI2, POS1, POS2):-
+  ORI2 > 1,
   POS1 > ORI1,
   POS2 < ORI2,
   ORI2 is ORI2 - 1,
@@ -443,6 +495,17 @@ evaluatePositions(ORI1, ORI2, POS1, POS2):-
   evaluatePositions(ORI1, ORI2, POS1, POS2).
 
 evaluatePositions(ORI1, ORI2, POS1, POS2):-
+  ORI1 > 1,
+  POS1 > ORI1,
+  POS2 < ORI2,
+  ORI1 is ORI1 - 1,
+  openFence(ORI1, ORI2),
+  ORI1 is ORI1 - 1,
+  emptySpace(ORI1, ORI2),
+  evaluatePositions(ORI1, ORI2, POS1, POS2).
+
+evaluatePositions(ORI1, ORI2, POS1, POS2):-
+  ORI1 < 13,
   POS1 > ORI1,
   POS2 = ORI2,
   ORI1 is ORI1 + 1,
@@ -452,6 +515,7 @@ evaluatePositions(ORI1, ORI2, POS1, POS2):-
   evaluatePositions(ORI1, ORI2, POS1, POS2).
 
 evaluatePositions(ORI1, ORI2, POS1, POS2):-
+  ORI2 < 13,
   POS1 = ORI1,
   POS2 > ORI2,
   ORI2 is ORI2 + 1,
@@ -461,6 +525,7 @@ evaluatePositions(ORI1, ORI2, POS1, POS2):-
   evaluatePositions(ORI1, ORI2, POS1, POS2).
 
 evaluatePositions(ORI1, ORI2, POS1, POS2):-
+  ORI1 > 1,
   POS1 < ORI1,
   POS2 = ORI2,
   ORI1 is ORI1 - 1,
@@ -470,6 +535,7 @@ evaluatePositions(ORI1, ORI2, POS1, POS2):-
   evaluatePositions(ORI1, ORI2, POS1, POS2).
 
 evaluatePositions(ORI1, ORI2, POS1, POS2):-
+  ORI2 > 1,
   POS1 = ORI1,
   POS2 < ORI2,
   ORI2 is ORI2 - 1,
