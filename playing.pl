@@ -85,7 +85,7 @@ movePiece(BOARD, P):-
 
 movePiece(BOARD, P):-
   write('you cant move the selected piece'),
-  playingMenu(BOARD, P)
+  playingMenu(BOARD, P).
 
 addFence(BOARD, POS1, POS2):-
   write('Introduce where you want to add a fence'),
@@ -123,12 +123,86 @@ checkGameEnd(BOARD, P):-
   \+ playerCanMove(BOARD, P).
 
 checkGameEnd(BOARD, P):-
-  %the total of scores is 49
-  totalScores(BOARD, P1, P2).
+  NPieces = 0,
+  countPieces(NPieces, 0),
+  %check if all areas are surrounded
+  checkAllAreas(NPieces, BOARD, 0).
+
+% CONTA O NUMERO TOTAL DE PEÇAS NO TABULEIRO
+countPieces(NPieces, L):-
+  L =< 13,
+  nth0(L, Board, Line),
+  !,
+  checkPieceLine(Line, NPieces).
+
+countPieces(NPieces, L):-
+  L > 13,
+  !.
+
+checkPieceLine(Line, NPieces):-
+  nth0(Pposition, Line, 1),
+  !,
+  NPieces is NPieces + 1,
+  replace(Pposition, 0, Line, Line),
+  checkPieceLine(Line, NPieces).
+
+checkPieceLine(Line, NPieces):-
+  nth0(Pposition, Line, 2),
+  !,
+  NPieces is NPieces + 1,
+  replace(Pposition, 0, Line, Line),
+  checkPieceLine(Line, NPieces).
+
+checkPieceLine(Line, NPieces):-
+  L is L + 1,
+  countPieces(NPieces, L).
+
+
+%%%%%%%%%%% CALCULATE SCORES EXACTLY EQUAL, BUT SAVES SCORES OF EACH PLAYER %%%%
+checkAllAreas(NPieces, BOARD, Counter):-
+  Counter < NPieces,
+  %copia tabuleiro para board2,
+  copy_term(BOARD, Board2),
+  findPiecePosition(POS1, POS2, 0),
+  %calcArea(POS1, POS2, S1),
+  deletePiece(POS1, POS2, Board2),
+  Counter is Counter + 1,
+  checkAllAreas(NPieces, Board2, Counter).
+
+checkAllAreas(NPieces, BOARD, Counter):-
+  Counter = NPieces,
+  !.
+
+findPiecePosition(POS1, POS2, IndLine):-
+  IndLine =< 13,
+  nth0(IndLine, Board2, Line),
+  member(1, Line),
+  ntho(POS2, Line, 1).
+
+findPiecePosition(POS1, POS2, IndLine):-
+  IndLine =< 13,
+  nth0(IndLine, Board2, Line),
+  member(2, Line),
+  ntho(POS2, Line, 2).
+
+findPiecePosition(POS1, POS2, IndLine):-
+  IndLine =< 13,
+  IndLine is IndLine + 1,
+  findPiecePosition(POS1, POS2, IndLine).
+
+deletePiece(POS1, POS2, Board2):-
+  nth0(POS1, Board2, Line),
+  nth0(POS2, Line, 0),
+  replace(POS1, Line, Board2, Board2).
+
+calcArea():-
+  .
+
+% - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
 playersCanMove(BOARD, P, IndL):-
   P = 1,
-  IndL <= 13,
+  IndL =< 13,
   nth0(IndL, Board, Line),
   member(1, Line),
   !,
@@ -171,17 +245,6 @@ canMove(IndL, Col):-
   nth0(IndL, Board, LineB),
   nth0(Col-2, LineB, 0).
 
-totalScores(BOARD, P1, P2):-
-  calculateScore(P1),
-  calculateScore(P2),
-  nth0(2, P1, S1),
-  nth0(2, P2, S2),
-  S is S1 + S2,
-  S = 49.
-
-/*
-lookForWinner():- %not sure if it's needed
-  .*/
 
 endTurn(BOARD, P):-
   P = 1,
@@ -192,15 +255,6 @@ endTurn(BOARD, P):-
   P = 2,
   P1 is 1,
   playingMenu(BOARD, P1).
-
-
-/*
-checkAreas():-
-  .
-
-checkPossibleMoves():-
-  .*/
-
 
 
 %%%%%%%%% UTILITU FUNCTIONS FOR ADD PIECES %%%%%%%%%
