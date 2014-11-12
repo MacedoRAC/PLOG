@@ -72,7 +72,7 @@ playingMenu(BOARD, P):-
   checkGameEnd(BOARD, P),
   !,
   write('Game Ended !'), nl,
-  countPoints(BOARD, P1, P2),
+  calculateScores(BOARD, P1, P2),
   write('Players1 pontuation: '), write(P1), nl,
   write('Players2 pontuation: '), write(P2), nl, nl,
   write('The winner is ').

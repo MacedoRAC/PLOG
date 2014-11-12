@@ -17,14 +17,13 @@ initialBoard([
             [4, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 4]  %fences line
             ]).
 
-
 % -------------------------------BOARD PRINTING---------------------------------
 translateChar(0,' '). %empty space
 translateChar(1,'x').
 translateChar(2,'o').
 translateChar(3,' '). %no fence
 translateChar(4,'|').
-translateChar(5,'_').
+translateChar(5,'-').
 translateChar(6, '+').
 
 printBoard_line([H|T]):-
@@ -70,14 +69,12 @@ movePiece(BOARD, P):-
   askPosition(ORI1, ORI2),
   checkPieceToMove(P, ORI1, ORI2),
   !,
-  POSITION1 = ORI1, %use this for replace once ORI was changed
-  POSITION2 = ORI2, %use this for replace once ORI was changed
   %ask for the final position of the movement
   write('Please introduce the piece final position'),
   askPosition(POS1, POS2),
   checkMovement(BOARD, ORI1, ORI2, POS1, POS2),
   %moves the piece
-  movesPiece(BOARD, POSITION1, POSITION2, POS1, POS2, P),
+  movesPiece(BOARD, ORI1, ORI2, POS1, POS2, P),
   printBoard(BOARD),
   %adding a fence
   addFence(BOARD, POS1, POS2),
@@ -199,7 +196,7 @@ deletePiece(POS1, POS2, Board2):-
   nth0(POS2, Line, 0),
   replace(POS1, Line, Board2, Board2).
 
-%pesquisa toda a area delimitada pelas paredes
+
 calcArea(POS1, POS2, BOARD):-
   %cria copia do Board
   copy_term(BOARD, Board2),
@@ -220,7 +217,7 @@ playersCanMove(BOARD, P, IndL):-
   nth0(IndL, Board, Line),
   member(1, Line),
   !,
-  checkLine(Line, IndL). %no final incrementar Line
+  checkLine(Line, IndL).
 
 playersCanMove(BOARD, P, IndL):-
   IndL =< 13,
